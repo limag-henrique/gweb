@@ -1,0 +1,2 @@
+C:\Users\Henrique Lima\Desktop\app clone\PresentationCore\obj\x64\Debug\PresentationCore.csproj.AssemblyReference.cache
+C:\Users\Henrique Lima\Desktop\app clone\PresentationCore\obj\x64\Debug\PresentationCore.csproj.CoreCompileInputs.cache
