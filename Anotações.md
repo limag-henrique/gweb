@@ -1,6 +1,6 @@
 # **Anotações**
 
-##### **Última atualização em: 26/03**
+##### **Criação no dia: 26/03**
 
 
 
@@ -19,12 +19,12 @@ WebVI - Deve comunicar por meio de uma camada intermediária, como uma app LabVI
 * O LabVIEW-G-style-"code"  é compilado diretamente em JavaScript/HTML/CSS
 * Devido ao protocolo HTTP, setar a taxa de atualização por volta de 2Hz
 * Nuvem da NI, porém é possível rodar localmente/outros servidores;
-* Interessante colocar 
 
 
 
-Para continuar as modificações selecione o .ripkg
+###### Criação do app similar ao Gweb:
 
+* Criação por vibe code do app original, em andamento.
 
 
 Study track:
@@ -32,4 +32,6 @@ Study track:
 * 42 min | How to Build a Web UI for Your LabVIEW-Based Test System 
 * 5 min | Gemini quiz
 * 5 min | App surfing
+* 6 min | What is G Web?
+
 
