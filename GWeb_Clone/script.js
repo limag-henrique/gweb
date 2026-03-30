@@ -9,6 +9,7 @@ const localVariables = {};                       // name → value
 let simulationInterval = null;
 let controlCounter = 1;
 let draggedType = null;
+let canvasZoom = 100; // percent
 
 const wiringState = {
     isWiring: false,
@@ -16,6 +17,30 @@ const wiringState = {
     tempLine: null,
     wires: []
 };
+
+// ─── ZOOM ───────────────────────────────────────────────────────
+function setCanvasZoom(percent) {
+    canvasZoom = Math.max(25, Math.min(200, percent));
+    var scale = canvasZoom / 100;
+    document.querySelectorAll('.canvas-view').forEach(function (v) {
+        v.style.transform = 'scale(' + scale + ')';
+        v.style.width = (100 / scale) + '%';
+        v.style.height = (100 / scale) + '%';
+    });
+    var sel = document.getElementById('zoom-select');
+    if (sel) sel.value = String(canvasZoom);
+    setTimeout(updateWires, 60);
+}
+
+// Ctrl + Scroll wheel zoom
+window.addEventListener('load', function () {
+    document.querySelector('.canvas-area').addEventListener('wheel', function (e) {
+        if (!e.ctrlKey) return;
+        e.preventDefault();
+        var delta = e.deltaY < 0 ? 25 : -25;
+        setCanvasZoom(canvasZoom + delta);
+    }, { passive: false });
+});
 
 // ─── TOAST NOTIFICATION SYSTEM ──────────────────────────────────
 function showToast(title, message, type) {
@@ -121,13 +146,22 @@ function evaluateDataflow() {
             vals[node.id].out = parseFloat(node.getAttribute('data-value')) || 0;
         } else if (t === 'bool_const') {
             vals[node.id].out = node.getAttribute('data-value') === 'true' ? 1 : 0;
+        } else if (t === 'str_const') {
+            vals[node.id].out = node.getAttribute('data-value') || '';
         } else if (t === 'ui_read') {
             var bid = dependencyPropertyManager.bindings[node.id];
             if (bid) {
                 var uiEl = document.getElementById(bid);
                 if (uiEl) {
-                    var inp = uiEl.querySelector('input[type="number"], input[type="range"], input[type="text"], select');
-                    vals[node.id].out = inp ? (parseFloat(inp.value) || 0) : 0;
+                    var inp = uiEl.querySelector('input[type="number"], input[type="range"], input[type="text"], select, input[type="checkbox"]');
+                    if (inp) {
+                        if (inp.type === 'checkbox') vals[node.id].out = inp.checked ? 1 : 0;
+                        else if (inp.type === 'text') vals[node.id].out = inp.value;
+                        else vals[node.id].out = parseFloat(inp.value) || 0;
+                    } else {
+                        var indEl = uiEl.querySelector('.ctrl-ind');
+                        vals[node.id].out = indEl ? parseFloat(indEl.textContent) || 0 : 0;
+                    }
                 }
             } else {
                 vals[node.id].out = 0;
@@ -170,13 +204,16 @@ function evaluateDataflow() {
             else if (t === 'div_node') v.out = b !== 0 ? a / b : 0;
             else if (t === 'gt_node') v.out = a > b ? 1 : 0;
             else if (t === 'lt_node') v.out = a < b ? 1 : 0;
-            else if (t === 'eq_node') v.out = a === b ? 1 : 0;
+            else if (t === 'eq_node') v.out = a == b ? 1 : 0;
             else if (t === 'not_node') v.out = a ? 0 : 1;
             else if (t === 'and_node') v.out = (a && b) ? 1 : 0;
             else if (t === 'or_node') v.out = (a || b) ? 1 : 0;
             else if (t === 'abs_node') v.out = Math.abs(a);
             else if (t === 'sqrt_node') v.out = Math.sqrt(Math.abs(a));
             else if (t === 'mod_node') v.out = b !== 0 ? a % b : 0;
+            else if (t === 'str_concat') v.out = String(a) + String(b);
+            else if (t === 'num2str_node') v.out = String(a);
+            else if (t === 'str2num_node') v.out = parseFloat(a) || 0;
 
             if (v.out !== prev) changed = true;
         });
@@ -206,21 +243,26 @@ function evaluateDataflow() {
 
 function writeToUIControl(el, val) {
     var inp = el.querySelector('input[type="number"], input[type="range"]');
+    var strInp = el.querySelector('input[type="text"]');
     var ind = el.querySelector('.ctrl-ind');
     var tankFill = el.querySelector('.ctrl-tank-fill');
     var chart = el.querySelector('.g-sim-chart');
     var progBar = el.querySelector('progress');
     var led = el.querySelector('.ctrl-led');
+    var tog = el.querySelector('.ctrl-toggle-switch');
+    var numVal = (typeof val === 'number') ? val : parseFloat(val) || 0;
 
-    if (inp) inp.value = val;
-    if (ind) ind.textContent = (typeof val === 'number') ? val.toFixed(2) : val;
-    if (tankFill) tankFill.style.height = Math.min(Math.max(val, 0), 100) + '%';
-    if (progBar) progBar.value = Math.min(Math.max(val, 0), 100);
-    if (led) led.style.background = val ? '#5cb85c' : '#333';
+    if (inp) inp.value = numVal;
+    if (strInp && typeof val === 'string') strInp.value = val;
+    if (ind) ind.textContent = (typeof val === 'number') ? val.toFixed(2) : String(val);
+    if (tankFill) tankFill.style.height = Math.min(Math.max(numVal, 0), 100) + '%';
+    if (progBar) progBar.value = Math.min(Math.max(numVal, 0), 100);
+    if (led) led.style.background = numVal ? '#5cb85c' : '#333';
+    if (tog) tog.checked = !!numVal;
     if (chart) {
         var bar = document.createElement('div');
         bar.className = 'chart-bar';
-        bar.style.height = Math.min(Math.max(val, 0), 100) + '%';
+        bar.style.height = Math.min(Math.max(numVal, 0), 100) + '%';
         chart.appendChild(bar);
         if (chart.children.length > 80) chart.removeChild(chart.children[0]);
     }
@@ -336,6 +378,7 @@ var DIAGRAM_TYPES = [
     'add_node', 'sub_node', 'mul_node', 'div_node', 'rand_num', 'num_const',
     'gt_node', 'lt_node', 'eq_node', 'not_node', 'and_node', 'or_node',
     'abs_node', 'sqrt_node', 'mod_node', 'bool_const',
+    'str_const', 'str_concat', 'num2str_node', 'str2num_node',
     'obt_queue', 'enq_elem', 'deq_elem', 'open_msg', 'read_tag',
     'ui_read', 'ui_write', 'local_var_read', 'local_var_write'
 ];
@@ -409,6 +452,12 @@ var htmlGenerators = {
     'and_node':    function () { return '<div class="g-node g-node-wide"><div class="g-port" data-io="in" data-idx="0"></div><div class="g-port" data-io="in" data-idx="1" style="top:25px;"></div><div class="g-port" data-io="out" data-idx="0"></div>AND</div>'; },
     'or_node':     function () { return '<div class="g-node g-node-wide"><div class="g-port" data-io="in" data-idx="0"></div><div class="g-port" data-io="in" data-idx="1" style="top:25px;"></div><div class="g-port" data-io="out" data-idx="0"></div>OR</div>'; },
 
+    // String nodes
+    'str_const':   function () { return '<div class="g-node g-node-wide" style="background:#d6eaf8;border-color:#2980b9;font-size:9px;"><div class="g-port" data-io="out" data-idx="0"></div><span class="const-display">"S"</span></div>'; },
+    'str_concat':  function () { return '<div class="g-node g-node-wide" style="background:#d6eaf8;border-color:#2980b9;font-size:9px;"><div class="g-port" data-io="in" data-idx="0"></div><div class="g-port" data-io="in" data-idx="1" style="top:25px;"></div><div class="g-port" data-io="out" data-idx="0"></div>CONCAT</div>'; },
+    'num2str_node': function () { return '<div class="g-node g-node-wide" style="background:#d6eaf8;border-color:#2980b9;font-size:9px;"><div class="g-port" data-io="in" data-idx="0"></div><div class="g-port" data-io="out" data-idx="0"></div>N→S</div>'; },
+    'str2num_node': function () { return '<div class="g-node g-node-wide" style="background:#d6eaf8;border-color:#2980b9;font-size:9px;"><div class="g-port" data-io="in" data-idx="0"></div><div class="g-port" data-io="out" data-idx="0"></div>S→N</div>'; },
+
     // Variables
     'local_var_read':  function () { return '<div class="g-node g-node-wide" style="background:#e8daef;border-color:#8e44ad;font-size:10px;"><div class="g-port" data-io="out" data-idx="0"></div><i class="fa-solid fa-download" style="margin-right:2px;font-size:9px;"></i>ReadVar</div>'; },
     'local_var_write': function () { return '<div class="g-node g-node-wide" style="background:#d5f5e3;border-color:#27ae60;font-size:10px;"><div class="g-port" data-io="in" data-idx="0"></div><i class="fa-solid fa-upload" style="margin-right:2px;font-size:9px;"></i>WriteVar</div>'; }
@@ -461,6 +510,7 @@ function drop(ev, targetView) {
     // Set default data attributes
     if (controlType === 'num_const') control.setAttribute('data-value', '0');
     if (controlType === 'bool_const') control.setAttribute('data-value', 'true');
+    if (controlType === 'str_const') control.setAttribute('data-value', '');
     if (controlType === 'local_var_read' || controlType === 'local_var_write') {
         control.setAttribute('data-varname', 'var1');
     }
@@ -561,16 +611,28 @@ function showPropertiesPane(id, type) {
     } else if (type === 'bool_const') {
         var bv = el.getAttribute('data-value') || 'true';
         extraHTML = '<div class="prop-item"><span>Valor Booleano:</span><select id="prop-bool-val"><option value="true"' + (bv === 'true' ? ' selected' : '') + '>True</option><option value="false"' + (bv === 'false' ? ' selected' : '') + '>False</option></select></div>';
+    } else if (type === 'str_const') {
+        var sv = el.getAttribute('data-value') || '';
+        extraHTML = '<div class="prop-item"><span>Valor String:</span><input type="text" id="prop-str-val" value="' + sv.replace(/"/g,'&quot;') + '" placeholder="ex: Hello"></div>';
     } else if (type === 'local_var_read' || type === 'local_var_write') {
         var vn = el.getAttribute('data-varname') || 'var1';
         extraHTML = '<div class="prop-item"><span>Nome da Variável:</span><input type="text" id="prop-varname" value="' + vn + '" placeholder="ex: temperatura"></div>';
     }
 
+    // Auto-binding dropdown for ui_read/ui_write
     var needsBinding = (type === 'ui_read' || type === 'ui_write' || DIAGRAM_TYPES.indexOf(type) === -1);
     var bindingHTML = '';
     if (needsBinding) {
+        var opts = '<option value="">(nenhum)</option>';
+        document.querySelectorAll('#painel-view > .ui-control').forEach(function(c){
+            var cType = c.getAttribute('data-type') || '?';
+            var lbl = c.querySelector('.ctrl-lbl');
+            var label = lbl ? lbl.textContent.trim() : cType;
+            var sel = (bindingVal === c.id) ? ' selected' : '';
+            opts += '<option value="'+c.id+'"'+sel+'>'+label+' ('+c.id+')</option>';
+        });
         bindingHTML = '<h4 style="color:#107c10;margin-top:18px;margin-bottom:8px;font-weight:400;font-size:13px;"><i class="fa-solid fa-link"></i> Data Binding</h4>' +
-            '<div class="prop-item"><span>Vincular a (ID):</span><input type="text" id="prop-binding-input" value="' + bindingVal + '" placeholder="ex: comp_3"></div>';
+            '<div class="prop-item"><span>Vincular a:</span><select id="prop-binding-input">' + opts + '</select></div>';
     }
 
     document.getElementById('prop-editor').innerHTML =
@@ -605,7 +667,7 @@ function showPropertiesPane(id, type) {
         });
     }
 
-    // Wire up binding
+    // Wire up binding (now a dropdown)
     var bindingInput = document.getElementById('prop-binding-input');
     if (bindingInput) {
         bindingInput.addEventListener('change', function () {
@@ -616,6 +678,16 @@ function showPropertiesPane(id, type) {
             } else {
                 delete dependencyPropertyManager.bindings[id];
             }
+        });
+    }
+
+    // Wire up str_const
+    var strInput = document.getElementById('prop-str-val');
+    if (strInput) {
+        strInput.addEventListener('input', function () {
+            el.setAttribute('data-value', this.value);
+            var disp = el.querySelector('.const-display');
+            if (disp) disp.textContent = '"' + this.value.substr(0,6) + '"';
         });
     }
 

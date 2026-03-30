@@ -69,10 +69,14 @@
             </div>
             <div class="toolbar-right">
                 <button class="tool-btn" onclick="toggleView('codigo')" title="Código (&lt;/&gt;)"><i class="fa-solid fa-code"></i></button>
-                <select class="zoom-select">
-                    <option>100%</option>
-                    <option>75%</option>
-                    <option>50%</option>
+                <select class="zoom-select" id="zoom-select" onchange="setCanvasZoom(parseInt(this.value))">
+                    <option value="200">200%</option>
+                    <option value="150">150%</option>
+                    <option value="125">125%</option>
+                    <option value="100" selected>100%</option>
+                    <option value="75">75%</option>
+                    <option value="50">50%</option>
+                    <option value="25">25%</option>
                 </select>
             </div>
         </div>
@@ -97,9 +101,9 @@
                         <div class="category">
                             <div class="category-header active" onclick="toggleCategory(this)"><i class="fa-solid fa-chevron-right fa-rotate-90"></i> Recipientes (Layout)</div>
                             <div class="category-grid">
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'flex_row')"><div class="item-icon"><i class="fa-solid fa-table-columns"></i></div><div class="item-label">Flex Row</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'flex_col')"><div class="item-icon"><i class="fa-solid fa-table-cells-large"></i></div><div class="item-label">Flex Column</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'grid_layout')"><div class="item-icon"><i class="fa-solid fa-border-all"></i></div><div class="item-label">Grid</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'flex_row')"><div class="item-icon"><i class="fa-solid fa-table-columns"></i></div><div class="item-label">Linha Flex</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'flex_col')"><div class="item-icon"><i class="fa-solid fa-table-cells-large"></i></div><div class="item-label">Coluna Flex</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'grid_layout')"><div class="item-icon"><i class="fa-solid fa-border-all"></i></div><div class="item-label">Grade</div></div>
                             </div>
                         </div>
 
@@ -109,11 +113,11 @@
                             <div class="category-grid">
                                 <div class="palette-item" draggable="true" ondragstart="drag(event, 'num_ctrl')"><div class="item-icon">0 <i class="fa-solid fa-sort"></i></div><div class="item-label">Numérico</div></div>
                                 <div class="palette-item" draggable="true" ondragstart="drag(event, 'num_ind')"><div class="item-icon gray">0</div><div class="item-label">Indicador</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'h_slider')"><div class="item-icon"><i class="fa-solid fa-sliders"></i></div><div class="item-label">Slider H</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'v_slider')"><div class="item-icon"><i class="fa-solid fa-sliders fa-rotate-90"></i></div><div class="item-label">Slider V</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'gauge')"><div class="item-icon"><i class="fa-solid fa-gauge"></i></div><div class="item-label">Gauge</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'h_slider')"><div class="item-icon"><i class="fa-solid fa-sliders"></i></div><div class="item-label">Desliz. H</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'v_slider')"><div class="item-icon"><i class="fa-solid fa-sliders fa-rotate-90"></i></div><div class="item-label">Desliz. V</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'gauge')"><div class="item-icon"><i class="fa-solid fa-gauge"></i></div><div class="item-label">Medidor</div></div>
                                 <div class="palette-item" draggable="true" ondragstart="drag(event, 'tank')"><div class="item-icon"><i class="fa-solid fa-battery-half fa-rotate-270"></i></div><div class="item-label">Tanque</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'prog_linear')"><div class="item-icon"><i class="fa-solid fa-bars-progress"></i></div><div class="item-label">Progress</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'prog_linear')"><div class="item-icon"><i class="fa-solid fa-bars-progress"></i></div><div class="item-label">Progresso</div></div>
                             </div>
                         </div>
 
@@ -122,10 +126,10 @@
                             <div class="category-header active" onclick="toggleCategory(this)"><i class="fa-solid fa-chevron-right fa-rotate-90"></i> Botões</div>
                             <div class="category-grid">
                                 <div class="palette-item" draggable="true" ondragstart="drag(event, 'text_btn')"><div class="item-icon">Aa</div><div class="item-label">Botão</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'stop_btn')"><div class="item-icon"><i class="fa-solid fa-stop text-red"></i></div><div class="item-label">Stop</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'power_btn')"><div class="item-icon"><i class="fa-solid fa-power-off"></i></div><div class="item-label">Power</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'checkbox')"><div class="item-icon"><i class="fa-regular fa-square-check"></i></div><div class="item-label">Checkbox</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'h_switch')"><div class="item-icon"><i class="fa-solid fa-toggle-on"></i></div><div class="item-label">Switch</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'stop_btn')"><div class="item-icon"><i class="fa-solid fa-stop text-red"></i></div><div class="item-label">Parar</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'power_btn')"><div class="item-icon"><i class="fa-solid fa-power-off"></i></div><div class="item-label">Ligar</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'checkbox')"><div class="item-icon"><i class="fa-regular fa-square-check"></i></div><div class="item-label">Caixa Seleção</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'h_switch')"><div class="item-icon"><i class="fa-solid fa-toggle-on"></i></div><div class="item-label">Interruptor</div></div>
                                 <div class="palette-item" draggable="true" ondragstart="drag(event, 'led')"><div class="item-icon"><div style="width:20px;height:20px;background:#5cb85c;margin:auto;"></div></div><div class="item-label">LED</div></div>
                             </div>
                         </div>
@@ -134,9 +138,9 @@
                         <div class="category">
                             <div class="category-header" onclick="toggleCategory(this)"><i class="fa-solid fa-chevron-right"></i> Texto</div>
                             <div class="category-grid">
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'str_ctrl')"><div class="item-icon">abc</div><div class="item-label">String</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'str_ind')"><div class="item-icon gray">abc</div><div class="item-label">String Ind</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'text_lbl')"><div class="item-icon" style="border:1px dashed #666;">TXT</div><div class="item-label">Label</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'str_ctrl')"><div class="item-icon">abc</div><div class="item-label">Texto</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'str_ind')"><div class="item-icon gray">abc</div><div class="item-label">Ind. Texto</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'text_lbl')"><div class="item-icon" style="border:1px dashed #666;">TXT</div><div class="item-label">Rótulo</div></div>
                                 <div class="palette-item" draggable="true" ondragstart="drag(event, 'hyperlink')"><div class="item-icon"><i class="fa-solid fa-link"></i></div><div class="item-label">Link</div></div>
                             </div>
                         </div>
@@ -145,19 +149,19 @@
                         <div class="category">
                             <div class="category-header active" onclick="toggleCategory(this)"><i class="fa-solid fa-chevron-right fa-rotate-90"></i> Gráficos</div>
                             <div class="category-grid">
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'graph')"><div class="item-icon"><i class="fa-solid fa-chart-line"></i></div><div class="item-label">Graph</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'chart')"><div class="item-icon"><i class="fa-solid fa-chart-area"></i></div><div class="item-label">Chart</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'int_graph')"><div class="item-icon"><i class="fa-solid fa-border-all"></i></div><div class="item-label">Intensity</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'graph')"><div class="item-icon"><i class="fa-solid fa-chart-line"></i></div><div class="item-label">Gráfico</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'chart')"><div class="item-icon"><i class="fa-solid fa-chart-area"></i></div><div class="item-label">Gráfico Contínuo</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'int_graph')"><div class="item-icon"><i class="fa-solid fa-border-all"></i></div><div class="item-label">Intensidade</div></div>
                             </div>
                         </div>
 
                         <!-- Selectors -->
                         <div class="category">
-                            <div class="category-header" onclick="toggleCategory(this)"><i class="fa-solid fa-chevron-right"></i> Estruturas & Seletores</div>
+                            <div class="category-header" onclick="toggleCategory(this)"><i class="fa-solid fa-chevron-right"></i> Dados & Seletores</div>
                             <div class="category-grid">
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'data_grid')"><div class="item-icon"><i class="fa-solid fa-table"></i></div><div class="item-label">Data Grid</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'enum')"><div class="item-icon"><i class="fa-solid fa-sort"></i></div><div class="item-label">Enum</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'html_cont')"><div class="item-icon" style="border:1px dashed #ccc;">&lt;/&gt;</div><div class="item-label">JSLI</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'data_grid')"><div class="item-icon"><i class="fa-solid fa-table"></i></div><div class="item-label">Tabela</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'enum')"><div class="item-icon"><i class="fa-solid fa-sort"></i></div><div class="item-label">Seletor</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'html_cont')"><div class="item-icon" style="border:1px dashed #ccc;">&lt;/&gt;</div><div class="item-label">HTML</div></div>
                             </div>
                         </div>
                     </div>
@@ -170,10 +174,10 @@
                         <div class="category">
                             <div class="category-header active" onclick="toggleCategory(this)"><i class="fa-solid fa-chevron-right fa-rotate-90"></i> Estruturas</div>
                             <div class="category-grid">
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'while_loop')"><div class="item-icon"><i class="fa-solid fa-repeat"></i></div><div class="item-label">While Loop</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'for_loop')"><div class="item-icon"><b>N</b></div><div class="item-label">For Loop</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'case_struct')"><div class="item-icon"><b>?</b></div><div class="item-label">Case</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'event_struct')"><div class="item-icon"><i class="fa-solid fa-bolt"></i></div><div class="item-label">Event</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'while_loop')"><div class="item-icon"><i class="fa-solid fa-repeat"></i></div><div class="item-label">Laço While</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'for_loop')"><div class="item-icon"><b>N</b></div><div class="item-label">Laço For</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'case_struct')"><div class="item-icon"><b>?</b></div><div class="item-label">Caso</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'event_struct')"><div class="item-icon"><i class="fa-solid fa-bolt"></i></div><div class="item-label">Evento</div></div>
                             </div>
                         </div>
 
@@ -186,9 +190,20 @@
                                 <div class="palette-item" draggable="true" ondragstart="drag(event, 'mul_node')"><div class="item-icon"><b>×</b></div><div class="item-label">Multiplicar</div></div>
                                 <div class="palette-item" draggable="true" ondragstart="drag(event, 'div_node')"><div class="item-icon"><b>÷</b></div><div class="item-label">Dividir</div></div>
                                 <div class="palette-item" draggable="true" ondragstart="drag(event, 'mod_node')"><div class="item-icon"><b>%</b></div><div class="item-label">Módulo</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'abs_node')"><div class="item-icon">|x|</div><div class="item-label">Abs</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'sqrt_node')"><div class="item-icon">√</div><div class="item-label">Raiz</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'rand_num')"><div class="item-icon"><i class="fa-solid fa-dice"></i></div><div class="item-label">Random</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'abs_node')"><div class="item-icon">|x|</div><div class="item-label">Absoluto</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'sqrt_node')"><div class="item-icon">√</div><div class="item-label">Raiz Quad.</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'rand_num')"><div class="item-icon"><i class="fa-solid fa-dice"></i></div><div class="item-label">Aleatório</div></div>
+                            </div>
+                        </div>
+
+                        <!-- String -->
+                        <div class="category">
+                            <div class="category-header active" onclick="toggleCategory(this)"><i class="fa-solid fa-chevron-right fa-rotate-90"></i> Texto (Strings)</div>
+                            <div class="category-grid">
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'str_const')"><div class="item-icon" style="background:#d6eaf8;border-color:#2980b9;">"S"</div><div class="item-label">Const. Texto</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'str_concat')"><div class="item-icon" style="background:#d6eaf8;border-color:#2980b9;font-size:8px;">CONCAT</div><div class="item-label">Concatenar</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'num2str_node')"><div class="item-icon" style="background:#d6eaf8;border-color:#2980b9;font-size:9px;">N→S</div><div class="item-label">Núm→Texto</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'str2num_node')"><div class="item-icon" style="background:#d6eaf8;border-color:#2980b9;font-size:9px;">S→N</div><div class="item-label">Texto→Núm</div></div>
                             </div>
                         </div>
 
@@ -196,8 +211,8 @@
                         <div class="category">
                             <div class="category-header active" onclick="toggleCategory(this)"><i class="fa-solid fa-chevron-right fa-rotate-90"></i> Constantes</div>
                             <div class="category-grid">
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'num_const')"><div class="item-icon" style="background:#d4edda;border-color:#28a745;">0</div><div class="item-label">Num Const</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'bool_const')"><div class="item-icon" style="background:#fff3cd;border-color:#ffc107;">T/F</div><div class="item-label">Bool Const</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'num_const')"><div class="item-icon" style="background:#d4edda;border-color:#28a745;">0</div><div class="item-label">Const. Núm.</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'bool_const')"><div class="item-icon" style="background:#fff3cd;border-color:#ffc107;">T/F</div><div class="item-label">Const. Bool</div></div>
                             </div>
                         </div>
 
@@ -205,21 +220,21 @@
                         <div class="category">
                             <div class="category-header active" onclick="toggleCategory(this)"><i class="fa-solid fa-chevron-right fa-rotate-90"></i> Comparação & Lógica</div>
                             <div class="category-grid">
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'gt_node')"><div class="item-icon"><b>&gt;</b></div><div class="item-label">Maior</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'lt_node')"><div class="item-icon"><b>&lt;</b></div><div class="item-label">Menor</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'eq_node')"><div class="item-icon"><b>=</b></div><div class="item-label">Igual</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'not_node')"><div class="item-icon">NOT</div><div class="item-label">NOT</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'and_node')"><div class="item-icon">AND</div><div class="item-label">AND</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'or_node')"><div class="item-icon">OR</div><div class="item-label">OR</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'gt_node')"><div class="item-icon"><b>&gt;</b></div><div class="item-label">Maior Que</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'lt_node')"><div class="item-icon"><b>&lt;</b></div><div class="item-label">Menor Que</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'eq_node')"><div class="item-icon"><b>=</b></div><div class="item-label">Igual A</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'not_node')"><div class="item-icon">NÃO</div><div class="item-label">NÃO (NOT)</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'and_node')"><div class="item-icon">E</div><div class="item-label">E (AND)</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'or_node')"><div class="item-icon">OU</div><div class="item-label">OU (OR)</div></div>
                             </div>
                         </div>
 
                         <!-- Frontend I/O -->
                         <div class="category">
-                            <div class="category-header active" onclick="toggleCategory(this)"><i class="fa-solid fa-chevron-right fa-rotate-90"></i> Frontend I/O</div>
+                            <div class="category-header active" onclick="toggleCategory(this)"><i class="fa-solid fa-chevron-right fa-rotate-90"></i> Entrada/Saída do Painel</div>
                             <div class="category-grid">
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'ui_read')"><div class="item-icon" style="color:#0078d4;"><i class="fa-solid fa-eye"></i></div><div class="item-label">UI Read</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'ui_write')"><div class="item-icon" style="color:#107c10;"><i class="fa-solid fa-pen"></i></div><div class="item-label">UI Write</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'ui_read')"><div class="item-icon" style="color:#0078d4;"><i class="fa-solid fa-eye"></i></div><div class="item-label">Ler Painel</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'ui_write')"><div class="item-icon" style="color:#107c10;"><i class="fa-solid fa-pen"></i></div><div class="item-label">Escrever Painel</div></div>
                             </div>
                         </div>
 
@@ -236,9 +251,9 @@
                         <div class="category">
                             <div class="category-header" onclick="toggleCategory(this)"><i class="fa-solid fa-chevron-right"></i> Sincronização</div>
                             <div class="category-grid">
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'obt_queue')"><div class="item-icon"><i class="fa-solid fa-layer-group"></i></div><div class="item-label">Queue</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'enq_elem')"><div class="item-icon"><i class="fa-solid fa-arrow-right-to-bracket"></i></div><div class="item-label">Enqueue</div></div>
-                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'deq_elem')"><div class="item-icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></div><div class="item-label">Dequeue</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'obt_queue')"><div class="item-icon"><i class="fa-solid fa-layer-group"></i></div><div class="item-label">Fila</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'enq_elem')"><div class="item-icon"><i class="fa-solid fa-arrow-right-to-bracket"></i></div><div class="item-label">Enfileirar</div></div>
+                                <div class="palette-item" draggable="true" ondragstart="drag(event, 'deq_elem')"><div class="item-icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></div><div class="item-label">Desenfileirar</div></div>
                             </div>
                         </div>
                     </div>

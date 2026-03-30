@@ -90,7 +90,7 @@ body { overflow: hidden; background-color: #f0f0f0; }
 
 /* Canvas Area — CRITICAL: must be block, not flex, for absolute positioning */
 .canvas-area { flex: 1; background-color: #ffffff; position: relative; overflow: auto; }
-.canvas-view { display: none; width: 100%; height: 100%; position: relative; overflow: hidden; }
+.canvas-view { display: none; width: 100%; height: 100%; position: relative; overflow: auto; transform-origin: 0 0; transition: transform 0.2s ease; }
 .canvas-view.active-view { display: block; }
 .diagrama-bg { background-image: linear-gradient(#f0f0f0 1px, transparent 1px), linear-gradient(90deg, #f0f0f0 1px, transparent 1px); background-size: 20px 20px; background-color: #ffffff; }
 .canvas-instruction { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #888; font-size: 14px; line-height: 1.5; pointer-events: none; z-index: 0; }
@@ -144,10 +144,10 @@ body { overflow: hidden; background-color: #f0f0f0; }
 .g-struct-header { font-size: 11px; background: #666; color: white; display: inline-block; padding: 3px 8px; position: absolute; top: 0; left: 0; font-weight:600;}
 
 /* Dataflow Terminals & Wiring */
-.g-port { position: absolute; width: 10px; height: 10px; background: #555; border-radius: 50%; cursor: crosshair; z-index: 50; border: 2px solid #fff; pointer-events: auto !important; transition: transform 0.15s, background 0.15s;}
-.g-port:hover { background: #ffaa00; transform: scale(1.4); }
-.g-port[data-io="in"] { left: -6px; top: 14px; }
-.g-port[data-io="out"] { right: -6px; top: 14px; }
+.g-port { position: absolute; width: 12px; height: 12px; border-radius: 50%; cursor: crosshair; z-index: 50; border: 2px solid #fff; pointer-events: auto !important; transition: transform 0.15s, background 0.15s, box-shadow 0.15s;}
+.g-port:hover { transform: scale(1.5); box-shadow: 0 0 6px rgba(0,120,212,0.6); }
+.g-port[data-io="in"] { left: -7px; top: 13px; background: #e67e22; }
+.g-port[data-io="out"] { right: -7px; top: 13px; background: #2980b9; }
 
 .wire-line { stroke: #0078d4; stroke-width: 2.5; fill: none; stroke-linecap: round; pointer-events: visibleStroke; cursor: pointer; }
 .wire-line:hover { stroke: #ff4444; stroke-width: 4;}
