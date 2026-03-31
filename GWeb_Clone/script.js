@@ -81,6 +81,12 @@ document.addEventListener('keydown', function (e) {
     if (e.ctrlKey && e.key.toLowerCase() === 'r') { e.preventDefault(); runApp(); }
     if (e.ctrlKey && e.key.toLowerCase() === 's') { e.preventDefault(); showToast('Projeto Salvo', 'O projeto foi salvo offline!', 'success'); }
     if (e.key === 'Delete') {
+        // BUG FIX: Don't delete component if focus is inside a text field
+        var activeTag = document.activeElement ? document.activeElement.tagName : '';
+        var activeType = document.activeElement ? document.activeElement.type : '';
+        var isTyping = (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT'
+            || (activeTag === 'INPUT' && (activeType === 'text' || activeType === 'number')));
+        if (isTyping) return;
         var sel = document.querySelector('.ui-control.selected');
         if (sel) { deleteControl(sel.id); }
     }
@@ -277,6 +283,14 @@ function toggleView(viewName) {
         var fullCode = '<!DOCTYPE html>\n<html>\n<head>\n<style>\n  .ui-control { position:absolute; font-family:Segoe UI,sans-serif; }\n  .flex-container { display:flex; gap:10px; padding:10px; border:1px solid #ccc; }\n</style>\n</head>\n<body>\n<div class="app-interface">\n' + cleanHtml + '\n</div>\n<script>\nconsole.log("G Web App loaded.");\n<\/script>\n</body>\n</html>';
         document.getElementById('codigo-saida').innerText = fullCode;
     }
+
+    // BUG FIX: Clear selection and properties panel when switching views
+    document.querySelectorAll('.ui-control').forEach(function (c) { c.classList.remove('selected'); });
+    var propEditor = document.getElementById('prop-editor');
+    var propDefault = document.getElementById('prop-default');
+    if (propEditor) propEditor.classList.add('hidden');
+    if (propDefault) propDefault.classList.remove('hidden');
+
     document.querySelectorAll('.view-btn').forEach(function (b) { b.classList.remove('active'); });
     if (viewName !== 'codigo') {
         var btn = document.getElementById('btn-' + viewName);
@@ -488,9 +502,10 @@ function drop(ev, targetView) {
     control.classList.add('ui-control');
     control.setAttribute('data-type', draggedType);
 
-    var canvasRect = ev.currentTarget.getBoundingClientRect();
+    var canvasEl = ev.currentTarget;
+    var canvasRect = canvasEl.getBoundingClientRect();
     var dropTarget = ev.target.closest('.flex-container, .grid-container');
-    var finalParent = dropTarget || ev.currentTarget;
+    var finalParent = dropTarget || canvasEl;
 
     if (dropTarget) {
         control.style.position = 'relative';
@@ -498,8 +513,11 @@ function drop(ev, targetView) {
         control.style.top = '0';
         control.style.margin = '5px';
     } else {
-        control.style.left = (ev.clientX - canvasRect.left - 30) + 'px';
-        control.style.top = (ev.clientY - canvasRect.top - 15) + 'px';
+        // BUG FIX: Account for scroll offset of the canvas when placing nodes
+        var scrollLeft = canvasEl.scrollLeft || 0;
+        var scrollTop = canvasEl.scrollTop || 0;
+        control.style.left = (ev.clientX - canvasRect.left - 30 + scrollLeft) + 'px';
+        control.style.top = (ev.clientY - canvasRect.top - 15 + scrollTop) + 'px';
     }
 
     var controlType = draggedType;
@@ -694,8 +712,21 @@ function showPropertiesPane(id, type) {
     // Wire up num_const
     var constInput = document.getElementById('prop-const-val');
     if (constInput) {
+        // BUG FIX: Select all text on focus so typing replaces (not concatenates) the value
+        constInput.addEventListener('focus', function () {
+            this.select();
+        });
         constInput.addEventListener('input', function () {
+            // Use the raw string for live display, parse only for data attribute
+            var rawVal = this.value;
+            var v = rawVal === '' ? 0 : (parseFloat(rawVal) || 0);
+            el.setAttribute('data-value', v);
+            var disp = el.querySelector('.const-display');
+            if (disp) disp.textContent = rawVal === '' ? '0' : rawVal;
+        });
+        constInput.addEventListener('change', function () {
             var v = parseFloat(this.value) || 0;
+            this.value = v;
             el.setAttribute('data-value', v);
             var disp = el.querySelector('.const-display');
             if (disp) disp.textContent = v;
@@ -838,6 +869,17 @@ function updateWires() {
     var svg = document.getElementById('wiring-layer');
     if (!svg) return;
     var svgRect = svg.getBoundingClientRect();
+
+    // BUG FIX: Prune ghost wires whose source or target nodes no longer exist in the DOM
+    wiringState.wires = wiringState.wires.filter(function (w) {
+        var outNode = document.getElementById(w.outBox);
+        var inNode = document.getElementById(w.inBox);
+        if (!outNode || !inNode) {
+            if (w.line) w.line.remove();
+            return false;
+        }
+        return true;
+    });
 
     wiringState.wires.forEach(function (w) {
         var outPort = document.querySelector('#' + CSS.escape(w.outBox) + ' .g-port[data-io="out"][data-idx="' + w.outIdx + '"]');
